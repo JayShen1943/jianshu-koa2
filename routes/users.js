@@ -3,7 +3,7 @@
  * @Author: JayShen
  * @Date: 2021-10-27 17:18:26
  * @LastEditors: JayShen
- * @LastEditTime: 2021-11-11 11:50:29
+ * @LastEditTime: 2021-11-23 10:17:18
  */
 const router = require('koa-router')()
 const useCtl = require("../controller/user")
@@ -23,6 +23,7 @@ router.get('/find', useCtl.userFindAll)
 
 // 查询单个系统用户
 router.get('/find/:id', useCtl.userFindOne)
+// --------------------------以上为demo--------------------------------------
 
 // 登录
 router.post('/login', useCtl.login)
@@ -33,4 +34,8 @@ router.post('/reg', useCtl.reg)
 // 认证用户
 router.post('/verify', useCtl.verify)
 
+// 修改密码
+router.post('/update/pwd', useCtl.updatePwd)
+
+router.post('/update/personal', useCtl.updatePersonal)
 module.exports = router

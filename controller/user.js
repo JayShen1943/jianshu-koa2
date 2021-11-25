@@ -1,11 +1,11 @@
 /*
- * @Descripttion: 
+ * @Descripttion: user模块控制层
  * @Author: JayShen
  * @Date: 2021-10-28 10:30:42
  * @LastEditors: JayShen
- * @LastEditTime: 2021-11-18 11:44:04
+ * @LastEditTime: 2021-11-23 10:27:05
  */
-const { user } = require('../models')
+const user = require('../models/users')
 const crud = require("./util")
 let jwt = require('jsonwebtoken')
 // 添加系统用户
@@ -38,7 +38,7 @@ const userFindAll = async (ctx) => {
 const userFindOne = async (ctx) => {
     await crud.findOne(user, { _id: ctx.params.id }, ctx)
 }
-
+// --------------------------以上为demo--------------------------------------
 // 登录
 const login = async (ctx) => {
     // const rel = await crud.findOne(user, { _id: ctx.params.id }, ctx)
@@ -77,8 +77,21 @@ const reg = async ctx => {
             message: "用户已存在"
         }
     } else {
+        if (!username) {
+            ctx.body = {
+                code: 300,
+                message: '请输入用户名'
+            }
+            return
+        }
+        if (!pwd) {
+            ctx.body = {
+                code: 300,
+                message: '请输入密码'
+            }
+            return
+        }
         const res = await user.create({ username, pwd })
-
         if (res) {
             ctx.body = {
                 code: 200,
@@ -101,9 +114,7 @@ const verify = async ctx => {
     token = token.replace('Bearer ', '')
     try {
         let result = jwt.verify(token, 'jianshu-server-jwt')
-        console.log(result, 'result');
         const res = await user.findOne({ _id: result._id })
-        console.log(res);
         if (res) {
             ctx.body = {
                 code: 200,
@@ -129,17 +140,47 @@ const verify = async ctx => {
  */
 const updatePwd = async ctx => {
     let { username, pwd } = ctx.request.body
-    const rel = await Users.updateOne({
-        username, pwd
-    })
-    if (res) {
-        if (res.n > 0) {
+    const rel = await user.updateOne({ username }, { pwd })
+    if (rel) {
+        if (rel.acknowledged) {
             ctx.body = {
                 code: 200,
-                message: '密码修改成功'
+                message: '密码修改成功',
+                data: rel
             }
         }
     }
+}
+/**
+ * 修改用户个人信息
+ */
+const updatePersonal = async ctx => {
+    let { _id, avatar = '', sex = "", desc = '', phone = '', email = '' } = ctx.request.body
+    const rel = await user.updateOne({
+        _id
+    }, {
+        avatar,
+        sex,
+        desc,
+        phone,
+        email
+    }
+    )
+    if (rel) {
+        if (rel.acknowledged) {
+            ctx.body = {
+                code: 200,
+                message: '资料已更新',
+                data: rel
+            }
+        } else {
+            ctx.body = {
+                code: 300,
+                message: '资料更新失败',
+            }
+        }
+    }
+
 }
 module.exports = {
     userAdd,
@@ -150,5 +191,6 @@ module.exports = {
     login,
     reg,
     verify,
-    updatePwd
+    updatePwd,
+    updatePersonal
 }

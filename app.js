@@ -3,7 +3,7 @@
  * @Author: JayShen
  * @Date: 2021-10-27 17:18:26
  * @LastEditors: JayShen
- * @LastEditTime: 2021-11-11 13:57:55
+ * @LastEditTime: 2021-11-25 14:11:14
  */
 const Koa = require('koa')
 const app = new Koa()
@@ -18,9 +18,9 @@ const koaJwt = require('koa-jwt') //路由权限控制
 // 连接数据库
 mongoConnect()
 
-const index = require('./routes/index')
 const users = require('./routes/users')
-
+const upload = require('./routes/upload')
+const article = require('./routes/article')
 app.use(cors())
 // error handler
 onerror(app)
@@ -54,9 +54,9 @@ app.use(async (ctx, next) => {
 })
 
 // routes
-app.use(index.routes(), index.allowedMethods())
 app.use(users.routes(), users.allowedMethods())
-
+app.use(upload.routes(), upload.allowedMethods())
+app.use(article.routes(), article.allowedMethods())
 // error-handling
 app.on('error', (err, ctx) => {
   console.error('server error', err, ctx)
