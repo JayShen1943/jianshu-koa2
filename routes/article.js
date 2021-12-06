@@ -3,9 +3,9 @@
  * @Author: JayShen
  * @Date: 2021-11-23 14:27:02
  * @LastEditors: JayShen
- * @LastEditTime: 2021-11-25 16:19:55
+ * @LastEditTime: 2021-12-01 13:38:25
  */
-const { addArticle, update, findAll, findOne, del } = require('../controller/article')
+const { addArticle, update, findAll, findOne, del } = require('../mongoDB/controller/article')
 const router = require('koa-router')()
 router.prefix('/article')
 

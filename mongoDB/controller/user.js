@@ -3,7 +3,7 @@
  * @Author: JayShen
  * @Date: 2021-10-28 10:30:42
  * @LastEditors: JayShen
- * @LastEditTime: 2021-11-23 10:27:05
+ * @LastEditTime: 2021-12-04 12:06:53
  */
 const user = require('../models/users')
 const crud = require("./util")
@@ -182,6 +182,8 @@ const updatePersonal = async ctx => {
     }
 
 }
+
+
 module.exports = {
     userAdd,
     userUpdate,
@@ -192,5 +194,5 @@ module.exports = {
     reg,
     verify,
     updatePwd,
-    updatePersonal
+    updatePersonal,
 }

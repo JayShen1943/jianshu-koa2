@@ -3,7 +3,7 @@
  * @Author: JayShen
  * @Date: 2021-11-23 10:36:19
  * @LastEditors: JayShen
- * @LastEditTime: 2021-11-25 16:32:54
+ * @LastEditTime: 2021-12-01 13:38:38
  */
 const Article = require('../models/article')
 /**
@@ -34,26 +34,16 @@ const findOne = async ctx => {
         const rel = await Article.findOne({ id })
         if (rel) {
             isRead = true
-            ctx.body = {
-                code: 200,
-                data: rel,
-                message: "文章查询成功"
-            }
+            ctx.success(rel, '文章查询成功')
         } else {
-            ctx.body = {
-                code: 300,
-                message: "文章查询失败"
-            }
+            ctx.fail(300, '文章查询失败')
         }
         if (isRead) {
             // 统计文章阅读量 $inc:自增
             await Article.updateOne({ id }, { $inc: { read: 1 } })
         }
     } catch (error) {
-        ctx.body = {
-            code: 500,
-            message: "文章查询异常"
-        }
+        ctx.fail(500, '文章查询异常')
     }
 }
 /**
@@ -61,19 +51,25 @@ const findOne = async ctx => {
  */
 const findAll = async ctx => {
     try {
-        let { page, author } = ctx.query
+        let { page, author, pageSize } = ctx.query
+        console.log(author);
         // 页码判断
         if (!page || isNaN(Number(page))) {
             page = 1
         } else {
             page = Number(page)
         }
-        let pageSize = 10
-        let count = 0
+        // 每页展示条数判断
+        if (!pageSize || isNaN(Number(pageSize))) {
+            pageSize = 10
+        } else {
+            pageSize = Number(pageSize)
+        }
+        let total = 0
         let totalPage = 0
-        count = await Article.find({ author }).count()
-        if (count > 0) {
-            totalPage = Math.ceil(count / pageSize)
+        total = await Article.find({ author: author || null }).count()
+        if (total > 0) {
+            totalPage = Math.ceil(total / pageSize)
         }
         // 判断当前页码的范围
         if (totalPage > 0 && page > totalPage) {
@@ -83,20 +79,25 @@ const findAll = async ctx => {
         }
         // 计算起始位置
         let start = (page - 1) / pageSize
-        const rel = await Article.find({ author }).skip(start).limit(pageSize)
-        if (rel && rel.length > 0) {
-            ctx.body = {
-                code: 200,
-                data: rel,
-                page,
-                pageSize,
-                count,
-                message: '文章查询成功'
-            }
-        } else {
-            ctx.body = {
-                code: 300,
-                message: '没有查询到文章'
+
+        const rel = await Article.find({ author: author || null }).skip(start).limit(pageSize)
+        if (rel) {
+            if (rel.length === 0) {
+                const data = {
+                    list: rel,
+                    page: 0,
+                    pageSize: 0,
+                    total: 0,
+                }
+                ctx.success(data, '文章查询成功')
+            } else {
+                const data = {
+                    list: rel,
+                    page,
+                    pageSize,
+                    total,
+                }
+                ctx.success(data, '文章查询成功')
             }
         }
     } catch (error) {
@@ -104,6 +105,7 @@ const findAll = async ctx => {
             code: 500,
             message: '查询文章时出现异常'
         }
+        ctx.fail(500, '查询文章时出现异常')
     }
 }
 

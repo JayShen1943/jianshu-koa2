@@ -3,7 +3,7 @@
  * @Author: JayShen
  * @Date: 2021-11-23 10:27:30
  * @LastEditors: JayShen
- * @LastEditTime: 2021-11-23 10:36:02
+ * @LastEditTime: 2021-11-26 14:38:21
  */
 const mongoose = require('mongoose')
 const schema = new mongoose.Schema({
@@ -21,8 +21,8 @@ const schema = new mongoose.Schema({
         default: 0
     },
     comment: {
-        type: Number,
-        default: 0
+        type: String,
+        default: ""
     },
     author: String
 })
