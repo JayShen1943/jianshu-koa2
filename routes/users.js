@@ -3,7 +3,7 @@
  * @Author: JayShen
  * @Date: 2021-10-27 17:18:26
  * @LastEditors: JayShen
- * @LastEditTime: 2021-12-06 17:19:04
+ * @LastEditTime: 2021-12-09 16:35:09
  */
 const router = require('koa-router')()
 const useCtl = require("../mongoDB/controller/user")
@@ -47,6 +47,12 @@ router.post('/loginUser', userFun.loginUser)
 
 // 修改密码
 router.post('/update/pwd', userFun.updatePwd)
+
+// 修改用户个人信息
+router.post('/update/personal', userFun.updatePersonal)
+
+// 修改用户个人信息
+router.post('/del/personal', userFun.delPersonal)
 
 module.exports = router
 

@@ -3,7 +3,7 @@
  * @Author: JayShen
  * @Date: 2021-12-04 11:52:35
  * @LastEditors: JayShen
- * @LastEditTime: 2021-12-06 17:52:03
+ * @LastEditTime: 2021-12-09 16:55:47
  */
 const mySqlFun = require("../../mysql/db")
 let jwt = require('jsonwebtoken')
@@ -19,7 +19,7 @@ const findUser = async ctx => {
       where id="${id}" or username="${username}"
       limit 1`
     let result = await mySqlFun.query(_sql)
-    if (Types.isArrayLg) {
+    if (Types.isArrayLg(result)) {
         ctx.success(result[0], '用户查询成功')
     } else {
         result = null
@@ -35,7 +35,7 @@ const regUser = async ctx => {
     const { telephone, password, username } = ctx.request.body
     const _sql = `SELECT * FROM user_info WHERE telephone=?`
     const rel = await mySqlFun.query(_sql, [telephone])
-    if (Array.isArray(rel) && rel.length > 0) {
+    if (Types.isArrayLg(rel)) {
         ctx.fail(300, '账号已存在')
     } else {
         if (!telephone) {
@@ -54,8 +54,8 @@ const regUser = async ctx => {
             id: generateId()
         }
         const res = await mySqlFun.insertData('user_info', obj)
-        if (res) {
-            ctx.success('', '注册成功')
+        if (res.affectedRows) {
+            ctx.success(res, '注册成功')
         }
     }
 }
@@ -118,13 +118,13 @@ const updatePwd = async ctx => {
         return
     }
     const verify = await mySqlFun.findDataById(`user_info`, [result.id])
-    if (Types.isArrayLg) {
+    if (Types.isArrayLg(verify)) {
         if (verify[0].password === oldPwd) {
             const obj = {
                 password: confirmPwd,
             }
             const rel = await mySqlFun.query(`UPDATE user_info SET ? WHERE id = ?`, [obj, result.id])
-            if (rel) {
+            if (rel.affectedRows) {
                 ctx.success('', '密码修改成功')
             }
         } else {
@@ -133,4 +133,68 @@ const updatePwd = async ctx => {
     }
 
 }
-module.exports = { findUser, regUser, loginUser, updatePwd }
+
+/**
+ * 修改用户个人信息
+ */
+const updatePersonal = async ctx => {
+    const { username = "", avatar = '', gender = "", age = '', email = '' } = ctx.request.body
+    let token = ctx.header.authorization
+    token = token.replace('Bearer ', '')
+    const tokenData = jwt.verify(token, 'jianshu-server-jwt')
+    const verify = await mySqlFun.findDataById(`user_info`, [tokenData.id])
+    if (Types.isArrayLg(verify)) {
+        if (!username) {
+            ctx.fail(300, '请输入用户名')
+            return
+        }
+        if (!avatar) {
+            ctx.fail(300, '请上传头像')
+            return
+        }
+        if (!gender) {
+            ctx.fail(300, '请选择性别')
+            return
+        }
+        if (!age) {
+            ctx.fail(300, '请输入年龄')
+            return
+        }
+        if (!email) {
+            ctx.fail(300, '请输入邮箱')
+            return
+        }
+        const obj = {
+            username: username,
+            avatar: avatar,
+            gender: gender,
+            age: age,
+            email: email
+        }
+        const rel = await mySqlFun.updateData('user_info', obj, tokenData.id)
+        ctx.success(rel, '用户信息修改成功')
+        if (rel.affectedRows) {
+            ctx.success('', '用户信息修改成功')
+        } else {
+            ctx.fail(300, '用户信息修改失败')
+        }
+    }
+
+}
+/**
+ * 删除用户
+ */
+const delPersonal = async (ctx) => {
+    const { id } = ctx.request.body
+    if (!id) {
+        ctx.fail(300, '请选择用户')
+        return
+    }
+    const rel = await mySqlFun.deleteData('user_info', id)
+    if (rel.affectedRows) {
+        ctx.success('', '用户删除成功')
+    } else {
+        ctx.fail(300, '用户删除失败')
+    }
+}
+module.exports = { findUser, regUser, loginUser, updatePwd, updatePersonal, delPersonal }

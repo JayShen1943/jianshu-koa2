@@ -1,9 +1,9 @@
 /*
- * @Descripttion: 连接mySql
+ * @Descripttion: 连接mySql和 增删查改函数(防注入)
  * @Author: JayShen
  * @Date: 2021-11-27 10:48:26
  * @LastEditors: JayShen
- * @LastEditTime: 2021-12-06 17:24:09
+ * @LastEditTime: 2021-12-09 16:29:25
  */
 var config = require('./mysqlConfig');
 const mysql = require('mysql');
@@ -40,7 +40,12 @@ const createTable = (sql) => {
     return query(sql, [])
 }
 
-// 根据id查询
+/**
+ * 根据id查询
+ * @param {*} table 表名
+ * @param {*} id id
+ * @returns list
+ */
 const findDataById = (table, id) => {
     const _sql = "SELECT * FROM ?? WHERE id = ? "
     return query(_sql, [table, id])
@@ -52,22 +57,40 @@ const findDataByPage = (keys, table, start, end) => {
     return query(_sql, [keys, table, start, end])
 }
 
-// 插入数据
+/**
+ * 插入数据
+ * @param {*} table 表名
+ * @param {*} values 插入的值
+ * @returns list
+ */
 const insertData = (table, values) => {
     const _sql = `INSERT INTO ?? SET ?`
     return query(_sql, [table, values])
 }
 
-// 更新数据
-const updateData = (table, values, id) => {
-    const _sql = "UPDATE ?? SET ? WHETE id =? "
-    return query(_sql, [table, values, id])
+/**
+ * 更新数据
+ * @param {*} table 表名
+ * @param {*} values 插入的值
+ * @param {*} word 查询条件的值 
+ * @param {*} key 查询条件的Key
+ * @returns list
+ */
+const updateData = (table, values, word, key = 'id') => {
+    const _sql = `UPDATE ?? SET ? WHERE ${key} =? `
+    return query(_sql, [table, values, word])
 }
 
-// 删除数据
-const deleteDataById = (table, id) => {
-    const _sql = "DELETE FROM ?? WHERE id = ?"
-    return query(_sql, [table, id])
+/**
+ * 删除数据
+ * @param {*} table 表名
+ * @param {*} word 查询条件的值
+ * @param {*} key 查询条件的Key
+ * @returns 
+ */
+const deleteData = (table, word, key = "id") => {
+    const _sql = `DELETE FROM ?? WHERE ${key} =?`
+    return query(_sql, [table, word])
 }
 
 // 自定义查询
@@ -88,7 +111,7 @@ module.exports = {
     findDataByPage,
     insertData,
     updateData,
-    deleteDataById,
+    deleteData,
     select,
     count
 }
